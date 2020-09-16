@@ -1,0 +1,35 @@
+import com.sun.xml.bind.marshaller.DataWriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+public class JavaObjectToXML {
+
+    private static final Logger logger = LoggerFactory.getLogger(JavaObjectToXML.class);
+
+    public String getJavaTOXMLUtil(Object xml) {
+        String xmlContent = "";
+        try {
+            JAXBContext contextObj = JAXBContext.newInstance(EnvelopeXML.class);
+            StringWriter stringWriter = new StringWriter();
+            PrintWriter printWriter = new PrintWriter(stringWriter);
+            DataWriter dataWriter = new DataWriter(printWriter, "UTF-8", new JaxbCharacterEscapeHandler());
+            Marshaller marshallerObj = contextObj.createMarshaller();
+            marshallerObj.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+            marshallerObj.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+            marshallerObj.marshal(xml, dataWriter);
+            xmlContent = stringWriter.toString();
+            xmlContent = xmlContent.replace("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>",
+                    "<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+        } catch (JAXBException e) {
+            logger.error("Issue occured marshalling object to xml " + e.getMessage());
+        }
+        return xmlContent;
+    }
+}
